@@ -1,0 +1,9 @@
+# Environment variables
+.env
+
+# IntelliJ
+/.idea/
+/*.iml
+
+# Output
+/output*/

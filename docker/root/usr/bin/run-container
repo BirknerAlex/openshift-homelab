@@ -1,0 +1,92 @@
+#!/bin/bash
+
+set -e
+
+echo "$(date -R) --- Checkout output directory existing"
+if [ ! -d /output ]; then
+    echo "Please mount a directory to /output"
+    exit 1
+fi
+
+echo "$(date -R) --- Checking environment variables"
+
+if [ -z "${HOMELAB_PULL_SECRET}" ]; then
+    echo "HOMELAB_PULL_SECRET is not set"
+    exit 1
+fi
+
+if [ -z "${HOMELAB_CLUSTER_DOMAIN}" ]; then
+    echo "HOMELAB_CLUSTER_DOMAIN is not set"
+    exit 1
+fi
+
+if [ -z "${HOMELAB_CLUSTER_NAME}" ]; then
+    echo "HOMELAB_CLUSTER_NAME is not set"
+    exit 1
+fi
+
+if [ -z "${HOMELAB_CIDR}" ]; then
+    echo "HOMELAB_CIDR is not set"
+    exit 1
+fi
+
+if [ -z "${HOMELAB_SSH_KEY}" ]; then
+    echo "HOMELAB_SSH_KEY is not set"
+    exit 1
+fi
+
+if [ -z "${HOMELAB_INSTALL_DISK}" ]; then
+    echo "HOMELAB_INSTALL_DISK is not set"
+    exit 1
+fi
+
+# TODO: Check if dns records are set
+
+echo "$(date -R) --- Bootstrapping OpenShift"
+echo "- HOMELAB_CLUSTER_DOMAIN: ${HOMELAB_CLUSTER_DOMAIN}"
+echo "- HOMELAB_CLUSTER_NAME: ${HOMELAB_CLUSTER_NAME}"
+echo "- HOMELAB_CIDR: ${HOMELAB_CIDR}"
+echo "- HOMELAB_SSH_KEY: ${HOMELAB_SSH_KEY}"
+echo "- HOMELAB_PULL_SECRET: ${HOMELAB_PULL_SECRET}"
+echo "- HOMELAB_INSTALL_DISK: ${HOMELAB_INSTALL_DISK}"
+
+sed -i "s|%%CLUSTER_DOMAIN%%|""${HOMELAB_CLUSTER_DOMAIN}""|g" /opt/install-config.yaml
+sed -i "s|%%CLUSTER_NAME%%|""${HOMELAB_CLUSTER_NAME}""|g" /opt/install-config.yaml
+sed -i "s|%%CLUSTER_CIDR%%|""${HOMELAB_CIDR}""|g" /opt/install-config.yaml
+sed -i "s|%%CLUSTER_PULL_SECRET%%|""${HOMELAB_PULL_SECRET}""|g" /opt/install-config.yaml
+sed -i "s|%%CLUSTER_SSH_KEY%%|""${HOMELAB_SSH_KEY}""|g" /opt/install-config.yaml
+sed -i "s|%%CLUSTER_INSTALL_DISK%%|""${HOMELAB_INSTALL_DISK}""|g" /opt/install-config.yaml
+
+if [[ $HOMELAB_DEBUG == "true" ]]; then
+  echo "$(date -R) --- Created install-config.yaml"
+  cat /opt/install-config.yaml
+fi
+
+echo "$(date -R) --- Creating ignition file"
+openshift-install --dir=/opt create single-node-ignition-config
+
+echo "$(date -R) --- Embedding ignition file into RHCOS ISO"
+coreos-installer iso ignition embed -fi /opt/bootstrap-in-place-for-live-iso.ign /opt/rhcos-live.x86_64.iso
+
+echo "$(date -R) --- Copying files to output directory"
+cp -Rv /opt/* /output/
+
+echo "$(date -R) --- Create a DNS record, see output/openshift-dns-records."
+echo "api.${HOMELAB_CLUSTER_NAME}.${HOMELAB_CLUSTER_DOMAIN} IN A <DHCP-IP>" > /output/openshift-dns-records
+echo "api-int.${HOMELAB_CLUSTER_NAME}.${HOMELAB_CLUSTER_DOMAIN} IN A <DHCP-IP>" > /output/openshift-dns-records
+echo "*.apps.${HOMELAB_CLUSTER_NAME}.${HOMELAB_CLUSTER_DOMAIN} IN A <DHCP-IP>" >> /output/openshift-dns-records
+
+echo "$(date -R) --- Create a DHCP reservation, see output/openshift-dhcp-reservation."
+echo "host openshift-${HOMELAB_CLUSTER_NAME} { hardware ethernet <MAC>; fixed-address <DHCP-IP>; }" > /output/openshift-dhcp-reservation
+
+echo "$(date -R) --- Mount the ISO output/rhcos-live.x86_64.iso and boot the machine, have fun!"
+echo "$(date -R) --- You can close this now or watch the installation, starting 30 seconds."
+
+sleep 30
+openshift-install --dir=/output wait-for install-complete
+
+echo "$(date -R) --- Installation complete"
+PW=$(cat /opt/auth/kubeadmin-password)
+
+echo "$(date -R) --- Login to the cluster with: oc login -u kubeadmin -p $PW"
+echo "$(date -R) --- Open the console with: https://console-openshift-console.apps.${HOMELAB_CLUSTER_NAME}.${HOMELAB_CLUSTER_DOMAIN}"
