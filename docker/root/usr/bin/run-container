@@ -83,7 +83,7 @@ echo "$(date -R) --- Mount the ISO output/rhcos-live.x86_64.iso and boot the mac
 echo "$(date -R) --- You can close this now or watch the installation, starting 30 seconds."
 
 sleep 30
-openshift-install --dir=/output wait-for install-complete
+openshift-install --dir=/output wait-for install-complete --log-level debug
 
 echo "$(date -R) --- Installation complete"
 PW=$(cat /opt/auth/kubeadmin-password)
