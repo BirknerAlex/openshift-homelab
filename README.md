@@ -225,14 +225,14 @@ data:
     prometheusK8s:
       volumeClaimTemplate:
         spec:
-          storageClassName: hdd
+          storageClassName: lvms-hdd
           resources:
             requests:
               storage: 40Gi
     alertmanagerMain:
       volumeClaimTemplate:
         spec:
-          storageClassName: hdd
+          storageClassName: lvms-hdd
           resources:
             requests:
               storage: 10Gi
