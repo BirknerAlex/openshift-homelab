@@ -238,3 +238,12 @@ data:
               storage: 10Gi
 ```
 
+### Notice
+
+If your disk contains data, partitions or labels, lvm operator will not be able to use it.
+Run this on the OpenShift node as `root` to remove all partitions and labels:
+
+```bash
+sgdisk -Z /dev/vdX
+blockdev --rereadpt /dev/vdX
+```
