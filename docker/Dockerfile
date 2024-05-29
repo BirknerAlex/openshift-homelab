@@ -1,13 +1,14 @@
 FROM fedora:39
 
-ENV OCP_VERSION=stable-4.13
+ENV OCP_VERSION=stable-4.15
 ENV OCP_ARCH=x86_64
 
 COPY /root /
 
 RUN dnf install -y curl coreos-installer && \
     dnf upgrade -y && \
-    dnf clean all
+    dnf clean all && \
+    rm -rf /var/cache/dnf
 
 ENV PATH=$PATH:/usr/local/bin/
 
