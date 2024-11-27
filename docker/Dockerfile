@@ -1,4 +1,4 @@
-FROM fedora:39
+FROM fedora:41
 
 ENV OCP_VERSION=stable-4.17
 ENV OCP_ARCH=x86_64
