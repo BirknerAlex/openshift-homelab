@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -26,10 +29,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Get latest git tag
+        id: git_tag
+        run: echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           push: ${{ github.event_name != 'pull_request' }}
-          tags: tyrola/openshift-homelab:latest
+          tags: tyrola/openshift-homelab:latest,tyrola/openshift-homelab:${{ steps.git_tag.outputs.tag }}
           context: docker/
           platforms: linux/amd64

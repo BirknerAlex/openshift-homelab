@@ -1,4 +1,5 @@
 # openshift-homelab
+[![.github/workflows/build.yml](https://github.com/BirknerAlex/openshift-homelab/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/BirknerAlex/openshift-homelab/actions/workflows/build.yml)
 
 This project helps you to create an OpenShift single node cluster iso file for your homelab.
 
