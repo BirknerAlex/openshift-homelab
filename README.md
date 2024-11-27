@@ -245,5 +245,6 @@ Run this on the OpenShift node as `root` to remove all partitions and labels:
 
 ```bash
 sgdisk -Z /dev/vdX
+blkdiscard /dev/vdX
 blockdev --rereadpt /dev/vdX
 ```
