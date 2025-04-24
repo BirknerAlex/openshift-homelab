@@ -1,6 +1,6 @@
 FROM fedora:41
 
-ENV OCP_VERSION=stable-4.17
+ENV OCP_VERSION=stable-4.18
 ENV OCP_ARCH=x86_64
 
 COPY /root /
