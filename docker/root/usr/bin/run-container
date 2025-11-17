@@ -50,6 +50,16 @@ echo "- HOMELAB_SSH_KEY: ${HOMELAB_SSH_KEY}"
 echo "- HOMELAB_PULL_SECRET: ${HOMELAB_PULL_SECRET}"
 echo "- HOMELAB_INSTALL_DISK: ${HOMELAB_INSTALL_DISK}"
 
+# Optional IPv6 dual-stack configuration
+if [[ -n $HOMELAB_CIDR_IPV6 ]]; then
+  echo "- HOMELAB_CIDR_IPV6: ${HOMELAB_CIDR_IPV6}"
+
+  # Add IPv6 networking to install-config.yaml
+  yq eval '.networking.machineNetwork += [{"cidr": "'${HOMELAB_CIDR_IPV6}'"}]' -i /opt/install-config.yaml
+  yq eval '.networking.clusterNetwork += [{"cidr": "fd01::/48", "hostPrefix": 64}]' -i /opt/install-config.yaml
+  yq eval '.networking.serviceNetwork += ["fd02::/112"]' -i /opt/install-config.yaml
+fi
+
 sed -i "s|%%CLUSTER_DOMAIN%%|""${HOMELAB_CLUSTER_DOMAIN}""|g" /opt/install-config.yaml
 sed -i "s|%%CLUSTER_NAME%%|""${HOMELAB_CLUSTER_NAME}""|g" /opt/install-config.yaml
 sed -i "s|%%CLUSTER_CIDR%%|""${HOMELAB_CIDR}""|g" /opt/install-config.yaml

@@ -1,11 +1,11 @@
-FROM fedora:41
+FROM fedora:43
 
-ENV OCP_VERSION=stable-4.18
+ENV OCP_VERSION=stable-4.19
 ENV OCP_ARCH=x86_64
 
 COPY /root /
 
-RUN dnf install -y curl coreos-installer && \
+RUN dnf install -y curl coreos-installer yq && \
     dnf upgrade -y && \
     dnf clean all && \
     rm -rf /var/cache/dnf
@@ -37,6 +37,9 @@ ENV HOMELAB_CIDR=""
 ENV HOMELAB_INSTALL_DISK=""
 ENV HOMELAB_CLUSTER_NAME="homelab"
 ENV HOMELAB_CLUSTER_DOMAIN="homelab.local"
+
+# Optional settings
+ENV HOMELAB_CIDR_IPV6=""
 
 VOLUME ["/output"]
 

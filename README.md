@@ -16,6 +16,11 @@ This project helps you to create an OpenShift single node cluster iso file for y
 - 120GB of disk space
 - Optional: Additional disks for LVM local storage 
 
+### Pull Secret
+
+You need a Red Hat pull secret to pull the OpenShift images.
+You can create one for free by following the instructions [here](https://console.redhat.com/openshift/install/pull-secret).
+
 # Usage
 
 1. Create .env file with the following content and adjust the values to your environment:
@@ -34,6 +39,8 @@ HOMELAB_CLUSTER_NAME=your-cluster-name
 HOMELAB_CIDR=192.168.1.0/24
 # THe path to the disk, which is used to install the OpenShift cluster.
 HOMELAB_INSTALL_DISK=/dev/vda
+# Optionally: Enable IPv6 for the OpenShift cluster
+HOMELAB_CIDR_IPV6=2001:db8::/32
 ```
 
 2. Run the following Docker container to create the OpenShift cluster iso file:
